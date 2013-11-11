@@ -48,9 +48,8 @@ function getQuakes() {
 	    $('.message').html('Displaying' + quakes.length + 'earthquakes');
 	    addQuakeMarkers(gov.usgs.quakes, map);
 
-	}); //handle returned data function
 
-		
+	}); //handle returned data function
 		map = new google.maps.Map($('.map-container')[0], {
 	    center: new google.maps.LatLng(0, 0),
 	    zoom: 2,
@@ -61,10 +60,10 @@ function getQuakes() {
 } //getQuakes()
 
 function addQuakeMarkers(quakes, map) {
-    
     //loop over the quakes array and add a marker for each quake
     var quake;      //current quake data
     var idx;        //loop counter
+    var infoWindow; //Info Window for quake 
 
     for (idx = 0; idx < quakes.length; ++idx) {
         quake = quakes[idx];
@@ -75,23 +74,24 @@ function addQuakeMarkers(quakes, map) {
 			    position: new google.maps.LatLng(quake.location.latitude, quake.location.longitude)
 			});
 		}
-
-		google.maps.event.addListener(quake.mapMarker, 'click', function(){
-			if (gov.usgs.iw) {
-				gov.usgs.iw.close();
-			}
-    		//code that runs when user clicks on a marker
-    		gov.usgs.iw = new google.maps.InfoWindow({
-	   		content: new Date(quake.datetime).toLocaleString() + 
-	        ': magnitude ' + quake.magnitude + ' at depth of ' + 
-	
-	        quake.depth + ' meters'
-			});
-
-			//open the info window
-			gov.usgs.iw.open(map, this);
+    	//code that runs when user clicks on a marker
+		infoWindow = new google.maps.InfoWindow({
+			content: new Date(quake.datetime).toLocaleString() + 
+			': magnitude ' + quake.magnitude + ' at depth of ' + 
+			quake.depth + ' meters'
 		});
+
+		registerInfoWindow(map, quake.mapMarker, infoWindow);
+		//open the info window
     }
-
-
 } //addQuakeMarkers()
+
+function registerInfoWindow(map, marker, infoWindow) {
+    google.maps.event.addListener(marker, 'click', function(){
+		if(gov.usgs.iw){
+			gov.usgs.iw.close();
+		}
+    	gov.usgs.iw = infoWindow;
+        infoWindow.open(map, marker);
+    });                
+} 
